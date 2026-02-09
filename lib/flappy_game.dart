@@ -6,9 +6,10 @@ import 'package:flame/game.dart';
 import 'package:flame/input.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/components.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:flame_audio/flame_audio.dart';
 
 class FlappyGame extends FlameGame with TapDetector {
+
   //bird
   double birdY = 300;
   double velocity = 0;
@@ -27,9 +28,6 @@ class FlappyGame extends FlameGame with TapDetector {
   late ui.Image pipeImage;
   late ui.Image bgImage;
 
-  final AudioPlayer jumpPlayer = AudioPlayer();
-  final AudioPlayer gameOverPlayer = AudioPlayer();
-
   bool gameOverSoundPlayed = false;
 
   @override
@@ -38,8 +36,11 @@ class FlappyGame extends FlameGame with TapDetector {
     pipeImage = await images.load('pipes.png');
     bgImage = await images.load('background.png');
 
-    await jumpPlayer.setVolume(1);
-    await gameOverPlayer.setVolume(1);
+    // Preload Audio
+    await FlameAudio.audioCache.loadAll([
+      'jump.mp3',
+      'jatohv2.mp3',
+    ]);
   }
 
   @override
@@ -73,10 +74,10 @@ class FlappyGame extends FlameGame with TapDetector {
     }
   }
 
-  void triggerGameOverSound() async {
+  void triggerGameOverSound() {
     if (!gameOverSoundPlayed) {
       gameOverSoundPlayed = true;
-     await gameOverPlayer.play(AssetSource('audio/jatoh.mp3'));
+      FlameAudio.play('jatohv2.mp3');
     }
   }
 
@@ -107,7 +108,6 @@ class FlappyGame extends FlameGame with TapDetector {
 
     //pipes atas
     canvas.save();
-
     canvas.translate(pipeX + 40, pipeHeight);
     canvas.scale(1, -1);
 
@@ -122,7 +122,6 @@ class FlappyGame extends FlameGame with TapDetector {
       Rect.fromLTWH(-40, 0, 80, pipeHeight),
       Paint(),
     );
-
     canvas.restore();
 
     //pipe bawah
@@ -157,7 +156,7 @@ class FlappyGame extends FlameGame with TapDetector {
       resetGame();
     } else {
       velocity = jumpForce;
-      jumpPlayer.play(AssetSource('audio/jump.mp3')); 
+      FlameAudio.play('jump.mp3');
     }
   }
 
@@ -167,7 +166,7 @@ class FlappyGame extends FlameGame with TapDetector {
     pipeX = size.x;
     score = 0;
     gameOver = false;
-    gameOverSoundPlayed = true;
+    gameOverSoundPlayed = false;
   }
 
   void _drawText(Canvas canvas, String text, double x, double y) {

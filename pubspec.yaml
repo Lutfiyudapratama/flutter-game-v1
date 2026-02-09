@@ -37,7 +37,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   flame: ^1.35.0
-  audioplayers: ^6.0.0
+  flame_audio: ^1.2.1 
 
 
 dev_dependencies:
@@ -67,7 +67,7 @@ flutter:
     - assets/images/pipes.png
     - assets/images/background.png
     - assets/audio/jump.mp3
-    - assets/audio/jatoh.mp3
+    - assets/audio/jatohv2.mp3
 
     # - assets/images/pipesv2.png
 
