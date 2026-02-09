@@ -6,6 +6,7 @@ import 'package:flame/game.dart';
 import 'package:flame/input.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/components.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class FlappyGame extends FlameGame with TapDetector {
   //bird
@@ -25,14 +26,20 @@ class FlappyGame extends FlameGame with TapDetector {
   late ui.Image birdImage;
   late ui.Image pipeImage;
   late ui.Image bgImage;
-  // late ui.Image pipesv2Image;
+
+  final AudioPlayer jumpPlayer = AudioPlayer();
+  final AudioPlayer gameOverPlayer = AudioPlayer();
+
+  bool gameOverSoundPlayed = false;
 
   @override
   Future<void> onLoad() async {
     birdImage = await images.load('bird.png');
     pipeImage = await images.load('pipes.png');
     bgImage = await images.load('background.png');
-    // pipesv2Image = await images.load('pipesv2.png');
+
+    await jumpPlayer.setVolume(1);
+    await gameOverPlayer.setVolume(1);
   }
 
   @override
@@ -50,14 +57,26 @@ class FlappyGame extends FlameGame with TapDetector {
       pipeHeight = Random().nextDouble() * 300 + 50;
       score++;
     }
+
+    // Hit atas bawah
     if (birdY < 0 || birdY > size.y - 40) {
+      triggerGameOverSound();
       gameOver = true;
     }
 
+    // Hit pipe
     if (pipeX < 120 && pipeX + 80 > 80) {
       if (birdY < pipeHeight || birdY + 40 > pipeHeight + pipeGap) {
+        triggerGameOverSound();
         gameOver = true;
       }
+    }
+  }
+
+  void triggerGameOverSound() async {
+    if (!gameOverSoundPlayed) {
+      gameOverSoundPlayed = true;
+     await gameOverPlayer.play(AssetSource('audio/jatoh.mp3'));
     }
   }
 
@@ -85,6 +104,7 @@ class FlappyGame extends FlameGame with TapDetector {
       Rect.fromLTWH(80, birdY, 40, 40),
       Paint(),
     );
+
     //pipes atas
     canvas.save();
 
@@ -114,7 +134,12 @@ class FlappyGame extends FlameGame with TapDetector {
         pipeImage.width.toDouble(),
         pipeImage.height.toDouble(),
       ),
-     Rect.fromLTWH(pipeX, pipeHeight + pipeGap, 80, size.y - (pipeHeight + pipeGap),),
+      Rect.fromLTWH(
+        pipeX,
+        pipeHeight + pipeGap,
+        80,
+        size.y - (pipeHeight + pipeGap),
+      ),
       Paint(),
     );
 
@@ -132,6 +157,7 @@ class FlappyGame extends FlameGame with TapDetector {
       resetGame();
     } else {
       velocity = jumpForce;
+      jumpPlayer.play(AssetSource('audio/jump.mp3')); 
     }
   }
 
@@ -141,6 +167,7 @@ class FlappyGame extends FlameGame with TapDetector {
     pipeX = size.x;
     score = 0;
     gameOver = false;
+    gameOverSoundPlayed = true;
   }
 
   void _drawText(Canvas canvas, String text, double x, double y) {
